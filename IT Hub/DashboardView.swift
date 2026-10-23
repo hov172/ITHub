@@ -21,7 +21,7 @@ import Combine
                     Text(policy.appSubtitle).font(.title2.bold())
                 }
                 Spacer()
-                Text("v1.0.0").font(.caption).foregroundStyle(.secondary)
+                Text("v\(Self.appVersion)").font(.caption).foregroundStyle(.secondary)
             }
             if !health.notices.isEmpty {
                 DashboardCard(title: "Needs attention", icon: "info.circle", status: health.status, statusLabel: health.hoverSummary) {
@@ -82,11 +82,13 @@ import Combine
         .onAppear { health.start() }
         .task { await hardware.refresh() }
     }
+    /// MARKETING_VERSION from the Xcode project, so the version is set in one place.
+    static let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
     private var supportReport: String {
         let unavailable = "Unavailable"
         let h = hardware.snapshot
         var lines = [
-            "\(policy.appTitle) v1.0.0 — Support details",
+            "\(policy.appTitle) v\(Self.appVersion) — Support details",
             "Captured: \(Date().formatted(date: .abbreviated, time: .standard))",
             "Device: \(h?.deviceName ?? unavailable)",
             "Model: \(h?.model ?? unavailable)",

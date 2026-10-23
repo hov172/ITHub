@@ -78,7 +78,7 @@ All paths are relative to the repository root, the folder containing `IT Hub.xco
 | `scripts/build-ithub-uninstall-pkg.sh` | Change what the uninstaller removes | Removes the app, `/Library/Application Support/IT Hub` and the LaunchAgent plist by default. |
 | `scripts/make-profile.py` | Change profile metadata defaults (`PayloadScope`, description) | Organisation, display name and domain are options; edit the file only for the fixed fields. |
 | `IT Hub.xcodeproj/project.pbxproj`, setting `PRODUCT_BUNDLE_IDENTIFIER` | Change the bundle identifier for a different organisation | Set in Xcode under the target's Signing & Capabilities; applies to all three configurations. The package identifier, agent label and profile domain follow it automatically. Changing it triggers the identifier migration on upgrade and a fresh Location Services prompt. |
-| `IT Hub.xcodeproj/project.pbxproj`, setting `MARKETING_VERSION` | Bump the version number | Also update the version string in `IT Hub/DashboardView.swift` (header and support report heading) to match; the package and release take the version from the built app. |
+| `IT Hub.xcodeproj/project.pbxproj`, setting `MARKETING_VERSION` | Bump the version number | The dashboard header, support report, package and release all read the version from the built app, so this is the only place to change it. |
 | `IT Hub/Assets.xcassets/AppIcon.appiconset/` | Replace the app icon | Standard Xcode icon set. |
 | `IT Hub/ITHub.entitlements`, `IT Hub/DirectRead.entitlements` | Change entitlements for the sandboxed or Direct Read scheme | Rarely needed; the Direct Read build is the one to ship. |
 

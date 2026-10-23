@@ -10,6 +10,20 @@
 - Changing the bundle identifier made the installer place the new app beside the old one in `IT Hub.localized` while reporting success. The package now carries migration scripts and is marked non-relocatable.
 - A stray `\n` appended to the bundled `menu.json` was caught by the package script's JSON check; the build chain now fails on it instead of reusing the previous package.
 
+## Documentation audit — 22 October 2026
+
+The README was cross-checked against the code, scripts and the v1.0.0 release. Found and corrected:
+
+- Download section. Nothing pointed at the GitHub release, listed the seven files, or explained the checksums. Added, with the `shasum -c` verification command.
+- Validation counts still said 132 checks in 16 groups. The harness runs 134 in 17 after the location-prompt checks. Corrected.
+- Profile generator gained a `--domain` option during the rebrand that was undocumented. Added, with a note that it only matters if the identifier changes in Xcode.
+- Identifier as single source of truth. The Packaging section never said that the package identifier, agent label and profile domain all derive from the Xcode bundle identifier. Added.
+- Installer migration details. The Install section mentioned the preinstall and postinstall but not that they retire LaunchAgents from earlier identifiers and load the new agent into logged-in sessions. Added.
+- Release history for 1.0.0 lacked the two-step permission flow, the `locationPromptAtLaunch` key, the identifier refactor and the release tooling. Added as four bullets.
+- The version string was hard-coded twice in `DashboardView.swift`; it now reads `CFBundleShortVersionString`, so `MARKETING_VERSION` is the only place to bump it.
+
+Confirmed already correct: all sixteen policy keys documented, all four scripts documented, the credit line, the two-copies note about Xcode, the Done button behaviour, and every `menu-as.json` and Ayala Solutions reference.
+
 ## Validation
 
 - IT Hub Direct Read and IT Hub (sandboxed): Xcode builds succeeded at deployment target 13.6.

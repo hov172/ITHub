@@ -72,6 +72,7 @@ All paths are relative to the repository root, the folder containing `IT Hub.xco
 | File | Edit it to | Notes |
 |---|---|---|
 | `examples/menu-as.json` | Set your organisation's quick actions, phone, email, links, health thresholds, branding and feature switches | The file passed to the release script with `-j`; it becomes the managed config inside the installer and the content of the profile. Copy it under a new name for another environment. |
+| `examples/ITHub-AS.mobileconfig`, `examples/ITHub-default.mobileconfig` | Nothing by hand | Generated from the JSON files; replace them by rerunning `scripts/make-profile.py` after editing the JSON. Upload-ready for Jamf. |
 | `IT Hub/menu.json` | Change the defaults built into the app bundle | Used only when no profile and no managed or user file exists. Keep it free of organisation-specific values if the package may ship elsewhere. |
 | `scripts/build-release.sh` | Change default output folder, or the usage examples | Normally left alone; pass options instead. |
 | `scripts/build-ithub-pkg.sh` | Change the install location of the config, the LaunchAgent settings (`RunAtLoad`, `KeepAlive`), or the migration scripts | The agent label and package identifier default to the app's bundle identifier; override with `-l` and `-i` rather than editing. |
@@ -174,7 +175,7 @@ A profile delivers the same settings without a file and outranks every file. The
    python3 scripts/make-profile.py examples/menu-as.json build/ITHub-AS.mobileconfig --org "Ayala Solutions" --name "IT Hub (AS)"
    ```
 
-   `--org` fills the profile's organisation field and `--name` its display name in Jamf and in System Settings; both are cosmetic. The script validates the JSON and refuses a file without a `settings` object. Output goes to `build/`, which is not committed, so regenerate after cloning.
+   `--org` fills the profile's organisation field and `--name` its display name in Jamf and in System Settings; both are cosmetic. The script validates the JSON and refuses a file without a `settings` object. Output goes to `build/`, which is not committed, so regenerate after cloning. Ready-made copies of the two standard profiles are kept in `examples/ITHub-AS.mobileconfig` and `examples/ITHub-default.mobileconfig`; regenerate them with the commands above whenever the matching JSON changes.
 
 4. Check it if you like: `plutil -lint build/ITHub-AS.mobileconfig`, or open it in a text editor. It is an XML plist with one custom-settings payload of type `com.ayala.solutions.ithub` whose `settings` dictionary mirrors the JSON.
 

@@ -39,7 +39,7 @@ import Combine
                 summary("macOS", "desktopcomputer", .good, "Version read successfully; update status is separate") {
                     Text(ProcessInfo.processInfo.operatingSystemVersionString)
                 }
-                summary("FileVault", "shield", health.fileVaultStatus, security.state.label) {
+                summary("FileVault", "shield", security.state.status, security.state.label) {
                     Text(security.state.label)
                     if security.state == .unknown { settings("Open Settings", "com.apple.preference.security?FileVault") }
                 }

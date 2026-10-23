@@ -33,7 +33,7 @@ Precedence, highest first: configuration profile, `/Library/Application Support/
 
 ### Health policy
 
-The root `settings.policy` object in the same file tunes health rules. `fileVaultOff` accepts `critical` (red, the default), `warning` (orange) or `ignore` (no notice, no colour change). The FileVault card still shows the measured state in words whatever the policy. Unknown values keep the default. `expectedWiFiSSID` names the Wi-Fi network the Services card compares the current connection against; leave it empty (the default) to disable the comparison. This replaces the previous hard-coded preference. `uptimeWarningDays` sets how many days of uptime trigger the restart reminder (default 14); `0` disables the uptime check, and negative or non-numeric values keep the default.
+The root `settings.policy` object in the same file tunes health rules. `fileVaultOff` sets what FileVault being off does to the menu bar icon and the Needs attention list: `critical` (red, the default), `warning` (orange) or `ignore` (neither). The FileVault card itself always shows the measured state with its own red dot when FileVault is off, so the fact stays visible even where the policy keeps it out of the icon. Unknown values keep the default. `expectedWiFiSSID` names the Wi-Fi network the Services card compares the current connection against; leave it empty (the default) to disable the comparison. This replaces the previous hard-coded preference. `uptimeWarningDays` sets how many days of uptime trigger the restart reminder (default 14); `0` disables the uptime check, and negative or non-numeric values keep the default.
 
 Storage and battery thresholds follow the same rules, each with `0` disabling that tier and bad values keeping the default:
 

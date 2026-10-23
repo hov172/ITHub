@@ -92,7 +92,8 @@ nonisolated enum UpdateNotice {
             self.updateTask = nil
         }
     }
-    /// FileVault off is red by default; the managed policy can downgrade it to orange or ignore it.
+    /// Severity FileVault-off carries into the notices and the menu bar icon. The FileVault card
+    /// itself always shows the measured state, red when off, whatever the policy says.
     var fileVaultStatus: HealthStatus {
         security.state == .disabled ? quickActions.policy.fileVaultOff : security.state.status
     }

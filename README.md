@@ -65,6 +65,25 @@ The panel contains:
 
 Links that open System Settings or Activity Monitor hand activation to the destination and hide the panel first, so the menu bar panel never covers the app it just opened. All device checks are read-only: the app never changes system state.
 
+## Files to edit before building a package
+
+All paths are relative to the repository root, the folder containing `IT Hub.xcodeproj`. Nothing outside this list needs touching for a normal deployment.
+
+| File | Edit it to | Notes |
+|---|---|---|
+| `examples/menu-as.json` | Set your organisation's quick actions, phone, email, links, health thresholds, branding and feature switches | The file passed to the release script with `-j`; it becomes the managed config inside the installer and the content of the profile. Copy it under a new name for another environment. |
+| `IT Hub/menu.json` | Change the defaults built into the app bundle | Used only when no profile and no managed or user file exists. Keep it free of organisation-specific values if the package may ship elsewhere. |
+| `scripts/build-release.sh` | Change default output folder, or the usage examples | Normally left alone; pass options instead. |
+| `scripts/build-ithub-pkg.sh` | Change the install location of the config, the LaunchAgent settings (`RunAtLoad`, `KeepAlive`), or the migration scripts | The agent label and package identifier default to the app's bundle identifier; override with `-l` and `-i` rather than editing. |
+| `scripts/build-ithub-uninstall-pkg.sh` | Change what the uninstaller removes | Removes the app, `/Library/Application Support/IT Hub` and the LaunchAgent plist by default. |
+| `scripts/make-profile.py` | Change profile metadata defaults (`PayloadScope`, description) | Organisation, display name and domain are options; edit the file only for the fixed fields. |
+| `IT Hub.xcodeproj/project.pbxproj`, setting `PRODUCT_BUNDLE_IDENTIFIER` | Change the bundle identifier for a different organisation | Set in Xcode under the target's Signing & Capabilities; applies to all three configurations. The package identifier, agent label and profile domain follow it automatically. Changing it triggers the identifier migration on upgrade and a fresh Location Services prompt. |
+| `IT Hub.xcodeproj/project.pbxproj`, setting `MARKETING_VERSION` | Bump the version number | Also update the version string in `IT Hub/DashboardView.swift` (header and support report heading) to match; the package and release take the version from the built app. |
+| `IT Hub/Assets.xcassets/AppIcon.appiconset/` | Replace the app icon | Standard Xcode icon set. |
+| `IT Hub/ITHub.entitlements`, `IT Hub/DirectRead.entitlements` | Change entitlements for the sandboxed or Direct Read scheme | Rarely needed; the Direct Read build is the one to ship. |
+
+Typical sequence: edit `examples/menu-as.json`, then run `./scripts/build-release.sh -j examples/menu-as.json -n AS -O "Your Organisation"`. Everything lands in `build/`.
+
 ## How settings load
 
 All settings live in one document with this shape:

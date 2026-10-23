@@ -127,13 +127,44 @@ Fixed in code, on purpose: device readings refresh every minute, memory is sampl
 
 ## Configuration profile (Jamf and other MDM)
 
-A profile delivers the same settings without a file and outranks every file. Generate one from any configuration:
+A profile delivers the same settings without a file and outranks every file. The JSON stays the source of truth: edit the JSON, regenerate the profile, upload it. Never edit a `.mobileconfig` by hand, because the next regeneration overwrites it.
 
-```
-python3 scripts/make-profile.py examples/menu-slc.json build/ITHub-SLC.mobileconfig --org "Sarah Lawrence College" --name "IT Hub (SLC)"
-```
+### Create a profile
 
-The profile sets the `edu.slc.ithub` preference domain with a `settings` dictionary holding `branding`, `policy` and `content` exactly as in the JSON. The app also accepts those three keys at the top level of the domain. In Jamf Pro upload it under Computers → Configuration Profiles → Upload and scope it; the app switches to it within a second of it landing and falls back to the files when it is removed. Generated profiles are written to `build/`, which is not committed; regenerate from the JSON when it changes.
+1. Start from a configuration file: `examples/menu-slc.json`, or a copy of it for another environment.
+2. Edit the file. Quick Actions live in `settings.content`, health rules in `settings.policy`, header text in `settings.branding`; see the sections above for every key.
+3. Generate the profile:
+
+   ```
+   python3 scripts/make-profile.py examples/menu-slc.json build/ITHub-SLC.mobileconfig --org "Sarah Lawrence College" --name "IT Hub (SLC)"
+   ```
+
+   `--org` fills the profile's organisation field and `--name` its display name in Jamf and in System Settings; both are cosmetic. The script validates the JSON and refuses a file without a `settings` object. Output goes to `build/`, which is not committed, so regenerate after cloning.
+
+4. Check it if you like: `plutil -lint build/ITHub-SLC.mobileconfig`, or open it in a text editor. It is an XML plist with one custom-settings payload of type `edu.slc.ithub` whose `settings` dictionary mirrors the JSON.
+
+### Deploy it
+
+- **Jamf Pro**: Computers → Configuration Profiles → Upload, choose the `.mobileconfig`, scope it, save. Jamf shows it as a Custom Settings payload for the `edu.slc.ithub` domain. Other MDMs that accept a `.mobileconfig` upload work the same way.
+- **One Mac, for testing**: double-click the file in Finder, then approve it in System Settings → Privacy & Security → Profiles. Remove it from the same place.
+
+Either way macOS stores the payload at `/Library/Managed Preferences/edu.slc.ithub.plist`. The app switches to it within a second of it landing, the dashboard footer reads "Configuration profile", and removing the profile falls back to the files. Profile values are trusted, so `public.script` rows are honoured.
+
+### Change settings later
+
+Edit the JSON, regenerate, and upload the new `.mobileconfig` in Jamf as a replacement for the existing profile (edit the profile and upload again, or upload a new one with the same scope and retire the old). Macs pick up the change the next time the MDM pushes the profile; no app restart is needed. Alternatively, Jamf lets you edit the Custom Settings payload in place in its own editor: the keys are the same, but then Jamf holds the master copy instead of the JSON, so pick one place and stay with it.
+
+### Profile versus file
+
+| | Configuration profile | Managed `menu.json` |
+|---|---|---|
+| Delivered by | MDM | Installer package, MDM file push, or hand copy |
+| User can override | No | Only by a per-user file for non-script rows |
+| Scoping | Per MDM group | Whatever the package or push targets |
+| Edited with | JSON then regenerate | Any text editor, `sudo` to save |
+| Audit trail | In the MDM | None |
+
+Use the profile for a managed fleet. Use the file for a single Mac, a lab, or anywhere without MDM.
 
 ## Services card: reachability and speed test
 

@@ -172,6 +172,14 @@ The Internet line uses `NWPathMonitor`: Online, Offline or Checking, with the ca
 
 ## Packaging scripts
 
+`scripts/build-release.sh` is the one command a deployer needs. It runs the validation harness, builds the Direct Read app, builds the installer and uninstaller packages, generates the configuration profile, and lists the outputs in `build/`:
+
+```
+./scripts/build-release.sh -j examples/menu-slc.json -n SLC -O "Sarah Lawrence College"
+```
+
+Options: `-j` configuration to ship (default `IT Hub/menu.json`), `-n` short name used in file names and the profile title, `-O` organisation for the profile, `-o` output folder. For a signed, notarized release add `-a "Developer ID Application: ..."` to sign the app with the hardened runtime, `-I "Developer ID Installer: ..."` to sign both packages, and `-k <notarytool keychain profile>` to notarize and staple the installer (set the keychain profile up once with `xcrun notarytool store-credentials`). Without those, builds are ad-hoc signed and each Mac needs Gatekeeper approval. The individual scripts it calls can also be run alone:
+
 `scripts/build-ithub-pkg.sh` options: `-a` app bundle (required), `-j` menu.json to ship as the managed file (default `IT Hub/menu.json`; validated as JSON first), `-v` version (default: the app's `CFBundleShortVersionString`), `-i` package identifier (`edu.slc.ithub`), `-l` LaunchAgent label (`edu.slc.ithub.launcher`), `-o` output (`build/ITHub.pkg`). The package is built non-relocatable with the preinstall and postinstall described under Install.
 
 `scripts/build-ithub-uninstall-pkg.sh` options: `-v`, `-i` (`edu.slc.ithub.uninstall`), `-l`, `-o` (`build/ITHubUninstall.pkg`). It verifies that its removal script was registered in the package and fails the build otherwise.

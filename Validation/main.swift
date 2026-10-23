@@ -213,3 +213,7 @@ precondition(QuickActionConfig.parse(profileDoc, allowScripts: false).map(\.titl
 precondition(QuickActionConfig.preferenceDocument() == nil || QuickActionConfig.activeSourceDescription() == "Configuration profile")
 precondition(QuickActionConfig.preferenceDomain == "edu.slc.ithub")
 print("Passed 4 configuration-profile checks")
+
+precondition(HealthPolicy.parse("{}".data(using: .utf8)!)?.locationPromptAtLaunch == true)
+precondition(HealthPolicy.parse(#"{"settings":{"policy":{"locationPromptAtLaunch":false}}}"#.data(using: .utf8)!)?.locationPromptAtLaunch == false)
+print("Passed 2 location-prompt policy checks")

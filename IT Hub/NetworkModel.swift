@@ -7,9 +7,8 @@ import CoreLocation
     @Published private(set) var services: [NetworkServiceInfo]? = nil
     private let location = CLLocationManager()
     @Published private(set) var authorizationStatus: CLAuthorizationStatus = .notDetermined
-    private var startupRequestPending = false
-    private var activeObserver: AnyCancellable?
     private var permissionWindow: NSWindow?
+    var isAuthorized: Bool { authorizationStatus == .authorizedAlways || authorizationStatus == .authorized }
     var permissionActionTitle: String {
         switch authorizationStatus {
         case .notDetermined: "Allow Wi-Fi Name"
@@ -19,10 +18,10 @@ import CoreLocation
     }
     var permissionDescription: String {
         switch authorizationStatus {
-        case .notDetermined: "Permission has not been requested yet. A macOS permission dialog should appear; you can also use Allow Wi-Fi Name below."
+        case .notDetermined: "Nothing has been asked yet. When you click Allow Wi-Fi Name, macOS shows its own permission dialog; choose Allow there."
         case .denied: "Location access was previously denied. Enable IT Hub in System Settings → Privacy & Security → Location Services. macOS will not show the original prompt again."
         case .restricted: "Location access is restricted. Review Location Services or contact your administrator."
-        default: "Location access is already allowed. macOS will not ask again; refresh to read the network name."
+        default: "Location access is allowed. The Services card shows the Wi-Fi name; macOS will not ask again."
         }
     }
     func requestPermissionOnFirstLaunch() {
@@ -38,7 +37,7 @@ import CoreLocation
     }
     private func showPermissionWindow() {
         if permissionWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 440, height: 260), styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 440, height: 330), styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "IT Hub — Wi-Fi access"
             window.isReleasedWhenClosed = false
             window.contentView = NSHostingView(rootView: WiFiPermissionView(model: self))
@@ -46,26 +45,17 @@ import CoreLocation
             permissionWindow = window
         }
         guard let window = permissionWindow else { return }
-        startupRequestPending = location.authorizationStatus == .notDetermined
-        activeObserver = NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)
-            .merge(with: NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification, object: window))
-            .sink { [weak self] _ in
-                Task { @MainActor [weak self] in self?.requestPendingPermission() }
-            }
-        // Floating above the panel put this window over the macOS location prompt, hiding Allow.
+        // The window only explains. Asking macOS at the same time put the system dialog over
+        // this text and the window closed on Allow, so nobody could read why it was asked.
+        // Normal level keeps the system dialog, when it comes, on top and clickable.
         WindowPresentation.presentBeneathSystemPrompts(window)
-        requestPendingPermission()
     }
-    private func requestPendingPermission() {
-        guard startupRequestPending, NSApplication.shared.isActive, permissionWindow?.isKeyWindow == true else { return }
-        startupRequestPending = false
-        activeObserver = nil
-        guard location.authorizationStatus == .notDetermined else { return }
+    /// Called by the window's button: the one place the system dialog is triggered.
+    func requestSystemPermission() {
+        guard location.authorizationStatus == .notDetermined else { requestLocation(); return }
         location.requestWhenInUseAuthorization()
     }
     func closePermissionWindow() {
-        startupRequestPending = false
-        activeObserver = nil
         permissionWindow?.close()
     }
     override init() {
@@ -88,7 +78,6 @@ import CoreLocation
             guard let self else { return }
             self.authorizationStatus = self.location.authorizationStatus
             self.refresh()
-            if self.authorizationStatus == .authorizedAlways { self.closePermissionWindow() }
         }
     }
 }

@@ -4,7 +4,8 @@ import AppKit
     let networkModel = NetworkModel.shared
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Fleets that do not need the Wi-Fi name can switch the location prompt off in menu.json.
-        guard QuickActionConfig.loadPolicy().wifiNameLookup else { return }
+        let policy = QuickActionConfig.loadPolicy()
+        guard policy.wifiNameLookup, policy.locationPromptAtLaunch else { return }
         networkModel.requestPermissionOnFirstLaunch()
     }
 }

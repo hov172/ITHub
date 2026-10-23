@@ -52,6 +52,9 @@ nonisolated struct HealthPolicy: Equatable, Sendable {
     /// Seconds per speed-test phase (download, then upload); clamped to 2...20.
     var speedTestSeconds: Double = 5
     var wifiNameLookup = true
+    /// Show the explanation window once at launch when permission is undecided; false leaves the
+    /// request to the Services card button. MDM cannot pre-approve Location Services for an app.
+    var locationPromptAtLaunch = true
     var allowQuit = true
     /// Branding shown in the dashboard header, hover text and support report.
     var appTitle = "IT Hub"
@@ -78,6 +81,7 @@ nonisolated struct HealthPolicy: Equatable, Sendable {
         result.speedTestEnabled = policy["speedTestEnabled"] as? Bool ?? result.speedTestEnabled
         if let seconds = number(policy["speedTestSeconds"]) { result.speedTestSeconds = min(20, max(2, seconds)) }
         result.wifiNameLookup = policy["wifiNameLookup"] as? Bool ?? result.wifiNameLookup
+        result.locationPromptAtLaunch = policy["locationPromptAtLaunch"] as? Bool ?? result.locationPromptAtLaunch
         result.allowQuit = policy["allowQuit"] as? Bool ?? result.allowQuit
         let branding = (root["settings"] as? [String: Any])?["branding"] as? [String: Any] ?? [:]
         result.appTitle = text(branding["title"]) ?? result.appTitle

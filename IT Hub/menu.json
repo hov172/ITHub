@@ -21,7 +21,8 @@
       "speedTestEnabled": true,
       "wifiNameLookup": true,
       "allowQuit": true,
-      "speedTestSeconds": 5
+      "speedTestSeconds": 5,
+      "locationPromptAtLaunch": true
     },
     "content": [
       {

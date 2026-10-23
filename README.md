@@ -33,7 +33,7 @@ xcodebuild -scheme "IT Hub Direct Read" -configuration DirectRead build
 sudo installer -pkg build/ITHub.pkg -target /
 ```
 
-The package places `IT Hub.app` in `/Applications`, a managed `menu.json` in `/Library/Application Support/IT Hub`, and a LaunchAgent in `/Library/LaunchAgents` that starts the app at login and keeps it running. Its postinstall restarts the app for every logged-in user, so an upgrade takes effect without a logout. `build/ITHubUninstall.pkg` (from `scripts/build-ithub-uninstall-pkg.sh`) removes all three; it does not touch per-user files or configuration profiles.
+The package places `IT Hub.app` in `/Applications`, a managed `menu.json` in `/Library/Application Support/IT Hub`, and a LaunchAgent in `/Library/LaunchAgents` that starts the app at login. Its postinstall restarts the app for every logged-in user, so an upgrade takes effect without a logout. `build/ITHubUninstall.pkg` (from `scripts/build-ithub-uninstall-pkg.sh`) removes all three; it does not touch per-user files or configuration profiles.
 
 Upgrading from a 0.9.x build: those builds used a generated bundle identifier, and 1.0 uses the fixed `com.ayala.solutions.ithub`. macOS will not replace an app whose on-disk identifier differs, so the package carries a preinstall that removes the old copy and retires any LaunchAgent from an earlier identifier that still points at the app, and a postinstall that moves the new app into place if the installer had already planned around it, loads the new agent into each logged-in user's session, and starts it. Because the identifier changed, macOS treats 1.0 as a new app for Location Services: users who had allowed the Wi-Fi name lookup see the prompt once more.
 
@@ -75,7 +75,7 @@ All paths are relative to the repository root, the folder containing `IT Hub.xco
 | `examples/ITHub-AS.mobileconfig`, `examples/ITHub-default.mobileconfig` | Nothing by hand | Generated from the JSON files; replace them by rerunning `scripts/make-profile.py` after editing the JSON. Upload-ready for Jamf. |
 | `IT Hub/menu.json` | Change the defaults built into the app bundle | Used only when no profile and no managed or user file exists. Keep it free of organisation-specific values if the package may ship elsewhere. |
 | `scripts/build-release.sh` | Change default output folder, or the usage examples | Normally left alone; pass options instead. |
-| `scripts/build-ithub-pkg.sh` | Change the install location of the config, the LaunchAgent settings (`RunAtLoad`, `KeepAlive`), or the migration scripts | The agent label and package identifier default to the app's bundle identifier; override with `-l` and `-i` rather than editing. |
+| `scripts/build-ithub-pkg.sh` | Change the install location of the config, the LaunchAgent settings (`RunAtLoad`), or the migration scripts | The agent label and package identifier default to the app's bundle identifier; override with `-l` and `-i` rather than editing. |
 | `scripts/build-ithub-uninstall-pkg.sh` | Change what the uninstaller removes | Removes the app, `/Library/Application Support/IT Hub` and the LaunchAgent plist by default. |
 | `scripts/make-profile.py` | Change profile metadata defaults (`PayloadScope`, description) | Organisation, display name and domain are options; edit the file only for the fixed fields. |
 | `IT Hub.xcodeproj/project.pbxproj`, setting `PRODUCT_BUNDLE_IDENTIFIER` | Change the bundle identifier for a different organisation | Set in Xcode under the target's Signing & Capabilities; applies to all three configurations. The package identifier, agent label and profile domain follow it automatically. Changing it triggers the identifier migration on upgrade and a fresh Location Services prompt. |
@@ -202,7 +202,7 @@ Common adjustments:
 - Metered or satellite links: `"speedTestEnabled": false`, or shorten `speedTestSeconds` to 2.
 - Organisations that do not want a Location Services prompt at all: `"wifiNameLookup": false`. The Wi-Fi name and expected-network comparison disappear and macOS is never asked.
 - Keep the name lookup but avoid a window on first launch: `"locationPromptAtLaunch": false`; users can still allow it from the Services card.
-- Fleets where the LaunchAgent keeps the app alive anyway: `"allowQuit": false` hides the Quit button.
+- Kiosk or fleet Macs where users should not quit the app: `"allowQuit": false` hides the Quit button.
 
 ### Step 6: apply it
 
@@ -286,7 +286,7 @@ TopMenu keys and plugins not carried over: `arguments`, `runOnStart`, `iconKind`
 | `locationPromptAtLaunch` | `true` | `false` stops the one-time explanation window at launch; users can still allow the Wi-Fi name from the Services card. No profile can pre-approve Location Services for an app: macOS always asks the user. |
 | `speedTestEnabled` | `true` | `false` hides Run speed test. |
 | `speedTestSeconds` | 5 | Seconds per phase (download, then upload), clamped 2 to 20. Each phase runs at full link rate, so 5 s on a 200/40 Mbps link moves about 150 MB. |
-| `allowQuit` | `true` | `false` hides the Quit button, for fleets where the LaunchAgent keeps the app running anyway. |
+| `allowQuit` | `true` | `false` hides the Quit button. |
 
 Fixed in code, on purpose: device readings refresh every minute, memory is sampled every 10 seconds, a clean update result older than one hour becomes unknown, memory-pressure severity follows the kernel's own levels, and the dashboard is 720 points wide.
 

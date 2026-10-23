@@ -29,7 +29,6 @@ cat > "$ROOT/Library/LaunchAgents/$LABEL.plist" <<PLIST
   <key>Label</key><string>$LABEL</string>
   <key>ProgramArguments</key><array><string>/Applications/IT Hub.app/Contents/MacOS/IT Hub</string></array>
   <key>RunAtLoad</key><true/>
-  <key>KeepAlive</key><true/>
 </dict></plist>
 PLIST
 # Without this the installer may "relocate" the app onto any existing copy with the same bundle

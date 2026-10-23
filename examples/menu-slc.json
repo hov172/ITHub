@@ -1,0 +1,168 @@
+{
+  "functionIdentifier": "public.submenu",
+  "settings": {
+    "title": "Quick Actions",
+    "branding": {
+      "title": "IT Hub",
+      "subtitle": "Device Health"
+    },
+    "policy": {
+      "fileVaultOff": "critical",
+      "expectedWiFiSSID": "",
+      "uptimeWarningDays": 14,
+      "storageWarningGB": 20,
+      "storageCriticalGB": 5,
+      "batteryWarningPercent": 20,
+      "batteryCriticalPercent": 10,
+      "batteryHealthWarningPercent": 80,
+      "softwareUpdates": "warning",
+      "networkOffline": "warning",
+      "updateScanMinutes": 30,
+      "speedTestEnabled": true,
+      "wifiNameLookup": true,
+      "allowQuit": true,
+      "speedTestSeconds": 5
+    },
+    "content": [
+      {
+        "functionIdentifier": "public.submenu",
+        "settings": {
+          "title": "Help Desk",
+          "content": [
+            {
+              "functionIdentifier": "public.link",
+              "settings": {
+                "title": "Create Ticket",
+                "url": "https://helpdesk.example.com/new",
+                "icon": "plus.bubble"
+              }
+            },
+            {
+              "functionIdentifier": "public.link",
+              "settings": {
+                "title": "My IT Tickets",
+                "url": "https://helpdesk.example.com/tickets",
+                "icon": "ticket"
+              }
+            },
+            {
+              "functionIdentifier": "public.link",
+              "settings": {
+                "title": "Knowledge Base",
+                "url": "https://kb.example.com",
+                "icon": "book"
+              }
+            },
+            {
+              "functionIdentifier": "public.open.application",
+              "settings": {
+                "title": "Self Service",
+                "bundleIdentifier": "com.jamfsoftware.selfservice.mac",
+                "name": "Self Service",
+                "icon": "square.grid.2x2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "functionIdentifier": "public.submenu",
+        "settings": {
+          "title": "SLC ITS Help Desk",
+          "content": [
+            {
+              "functionIdentifier": "public.title",
+              "settings": {
+                "template": "Monday - Friday 9 a.m - 5 p.m"
+              }
+            },
+            {
+              "functionIdentifier": "public.title",
+              "settings": {
+                "template": "914-395-2460"
+              }
+            },
+            {
+              "functionIdentifier": "public.title",
+              "settings": {
+                "template": "hd@gm.slc.edu"
+              }
+            },
+            {
+              "functionIdentifier": "public.link",
+              "settings": {
+                "title": "Remote Support Link",
+                "url": "https://simplehelp.slc.edu/",
+                "icon": "safari"
+              }
+            },
+            {
+              "functionIdentifier": "public.open.application",
+              "settings": {
+                "title": "Open Remote Support",
+                "name": "Remote Support",
+                "icon": "display.2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "functionIdentifier": "public.submenu",
+        "settings": {
+          "title": "Browsers",
+          "content": [
+            {
+              "functionIdentifier": "public.open.application",
+              "settings": {
+                "title": "Safari",
+                "bundleIdentifier": "com.apple.Safari",
+                "name": "Safari"
+              }
+            },
+            {
+              "functionIdentifier": "public.open.application",
+              "settings": {
+                "title": "Firefox",
+                "bundleIdentifier": "org.mozilla.firefox",
+                "name": "Firefox"
+              }
+            },
+            {
+              "functionIdentifier": "public.open.application",
+              "settings": {
+                "title": "Chrome",
+                "bundleIdentifier": "com.google.Chrome",
+                "name": "Google Chrome"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "functionIdentifier": "public.submenu",
+        "settings": {
+          "title": "Mail",
+          "content": [
+            {
+              "functionIdentifier": "public.open.application",
+              "settings": {
+                "title": "Mail",
+                "bundleIdentifier": "com.apple.mail",
+                "name": "Mail"
+              }
+            },
+            {
+              "functionIdentifier": "public.open.application",
+              "settings": {
+                "title": "Outlook",
+                "bundleIdentifier": "com.microsoft.Outlook",
+                "name": "Microsoft Outlook"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -8,9 +8,24 @@ Version 1.0 merges two earlier apps: IT Hub 0.9.6 (the health dashboard) and Top
 
 This app is built on the IT-Hub work shared by Jorn de Koning on the Mac Admins Slack. His IT-Hub concept and implementation are the starting point for the health dashboard here; the configuration system, TopMenu merge, speed test and packaging were added on top of that foundation.
 
+## Download
+
+Ready-built files for each version are attached to the GitHub release for its tag, for example https://github.com/hov172/ITHub/releases/tag/v1.0.0:
+
+| File | Use |
+|---|---|
+| `ITHub-AS.pkg` | Installer with the Ayala Solutions configuration as the managed file |
+| `ITHub-default.pkg` | Installer with the neutral placeholder configuration |
+| `ITHubUninstall.pkg` | Removes the app, managed config and LaunchAgent |
+| `ITHub-AS.mobileconfig`, `ITHub-default.mobileconfig` | Matching configuration profiles for Jamf or any MDM |
+| `IT Hub-1.0.0.zip` | The app bundle alone, for manual installs or repackaging |
+| `SHA256SUMS.txt` | Checksums; verify with `shasum -a 256 -c SHA256SUMS.txt` |
+
+Release files are ad-hoc signed unless the release notes say otherwise. Everything in a release is produced by `scripts/build-release.sh` from the tagged commit, so it can be rebuilt from source.
+
 ## Install
 
-Build the installer and run it:
+Build the installer and run it, or use a package from a release:
 
 ```
 xcodebuild -scheme "IT Hub Direct Read" -configuration DirectRead build
@@ -20,7 +35,7 @@ sudo installer -pkg build/ITHub.pkg -target /
 
 The package places `IT Hub.app` in `/Applications`, a managed `menu.json` in `/Library/Application Support/IT Hub`, and a LaunchAgent in `/Library/LaunchAgents` that starts the app at login and keeps it running. Its postinstall restarts the app for every logged-in user, so an upgrade takes effect without a logout. `build/ITHubUninstall.pkg` (from `scripts/build-ithub-uninstall-pkg.sh`) removes all three; it does not touch per-user files or configuration profiles.
 
-Upgrading from a 0.9.x build: those builds used a generated bundle identifier, and 1.0 uses the fixed `com.ayala.solutions.ithub`. macOS will not replace an app whose on-disk identifier differs, so the package carries a preinstall that removes the old copy and a postinstall that moves the new app into place if the installer had already planned around it. Because the identifier changed, macOS treats 1.0 as a new app for Location Services: users who had allowed the Wi-Fi name lookup see the prompt once more.
+Upgrading from a 0.9.x build: those builds used a generated bundle identifier, and 1.0 uses the fixed `com.ayala.solutions.ithub`. macOS will not replace an app whose on-disk identifier differs, so the package carries a preinstall that removes the old copy and retires any LaunchAgent from an earlier identifier that still points at the app, and a postinstall that moves the new app into place if the installer had already planned around it, loads the new agent into each logged-in user's session, and starts it. Because the identifier changed, macOS treats 1.0 as a new app for Location Services: users who had allowed the Wi-Fi name lookup see the prompt once more.
 
 Two build schemes exist. **IT Hub Direct Read** runs outside App Sandbox and is the one to ship: it can read FileVault status and run update scans. **IT Hub** is sandboxed; FileVault and software-update checks show as unavailable there. Always pass `-configuration DirectRead` with the Direct Read scheme; `-configuration Release` silently swaps in the sandboxed entitlements. Builds are ad-hoc signed; Developer ID signing and notarization are the deployer's responsibility.
 
@@ -181,15 +196,15 @@ The Internet line uses `NWPathMonitor`: Online, Offline or Checking, with the ca
 
 Options: `-j` configuration to ship (default `IT Hub/menu.json`), `-n` short name used in file names and the profile title, `-O` organisation for the profile, `-o` output folder. For a signed, notarized release add `-a "Developer ID Application: ..."` to sign the app with the hardened runtime, `-I "Developer ID Installer: ..."` to sign both packages, and `-k <notarytool keychain profile>` to notarize and staple the installer (set the keychain profile up once with `xcrun notarytool store-credentials`). Without those, builds are ad-hoc signed and each Mac needs Gatekeeper approval. The individual scripts it calls can also be run alone:
 
-`scripts/build-ithub-pkg.sh` options: `-a` app bundle (required), `-j` menu.json to ship as the managed file (default `IT Hub/menu.json`; validated as JSON first), `-v` version (default: the app's `CFBundleShortVersionString`), `-i` package identifier (`com.ayala.solutions.ithub`), `-l` LaunchAgent label (`com.ayala.solutions.ithub.launcher`), `-o` output (`build/ITHub.pkg`). The package is built non-relocatable with the preinstall and postinstall described under Install.
+`scripts/build-ithub-pkg.sh` options: `-a` app bundle (required), `-j` menu.json to ship as the managed file (default `IT Hub/menu.json`; validated as JSON first), `-v` version (default: the app's `CFBundleShortVersionString`), `-i` package identifier (`com.ayala.solutions.ithub`), `-l` LaunchAgent label (`com.ayala.solutions.ithub.launcher`), `-o` output (`build/ITHub.pkg`). The package is built non-relocatable with the preinstall and postinstall described under Install. The package identifier and agent label default to the app's bundle identifier (`com.ayala.solutions.ithub`, set once in the Xcode project); the app reads its preference domain from the same value, so changing the identifier in Xcode re-brands the app, the packages and the profile domain together.
 
 `scripts/build-ithub-uninstall-pkg.sh` options: `-v`, `-i` (`com.ayala.solutions.ithub.uninstall`), `-l`, `-o` (`build/ITHubUninstall.pkg`). It verifies that its removal script was registered in the package and fails the build otherwise.
 
-`scripts/make-profile.py source.json output.mobileconfig [--org NAME] [--name NAME]` as above.
+`scripts/make-profile.py source.json output.mobileconfig [--org NAME] [--name NAME] [--domain ID]` as above; `--domain` defaults to the app's bundle identifier and only needs changing if the identifier was changed in Xcode.
 
 ## Validation
 
-`python3 Validation/run.py` compiles the app sources with the Xcode toolchain for macOS 13 and runs 132 checks in 16 groups: command parsing and bounded execution, process-group timeout, uptime boundaries and storage arithmetic, memory pressure and usage, health priority and update naming, update freshness and network uncertainty, quick-action parsing (grouping, `{value}` skipping, URL validation, script filtering by trust, hidden flags, source ordering), speed maths and reachability labels, every policy key (FileVault, Wi-Fi, uptime, storage, battery, updates, network, feature switches, branding), and configuration-profile parsing. Both Xcode schemes build. The speed engine was also run end to end from a command-line harness, and the installed app was checked live for reachability, speed, hot reload of files, and profile precedence through staged managed preferences.
+`python3 Validation/run.py` compiles the app sources with the Xcode toolchain for macOS 13 and runs 134 checks in 17 groups: command parsing and bounded execution, process-group timeout, uptime boundaries and storage arithmetic, memory pressure and usage, health priority and update naming, update freshness and network uncertainty, quick-action parsing (grouping, `{value}` skipping, URL validation, script filtering by trust, hidden flags, source ordering), speed maths and reachability labels, every policy key (FileVault, Wi-Fi, uptime, storage, battery, updates, network, feature switches, location prompt, branding), and configuration-profile parsing. Both Xcode schemes build. The speed engine was also run end to end from a command-line harness, and the installed app was checked live for reachability, speed, hot reload of files, and profile precedence through staged managed preferences.
 
 ## Release history
 
@@ -203,6 +218,9 @@ Options: `-j` configuration to ship (default `IT Hub/menu.json`), `-n` short nam
 - Installer: non-relocatable package, old-identifier migration, agent restart after upgrade; uninstaller now actually registers its removal script.
 - Script timeouts stop the whole process group; a managed config rewritten in place now triggers a reload.
 - Sandboxed scheme gained the outgoing-network entitlement.
+- Wi-Fi permission flow explains first, asks macOS only when the user clicks, and keeps the result on screen; `locationPromptAtLaunch` can suppress the launch-time window.
+- Bundle identifier `com.ayala.solutions.ithub` is the single source for the package identifier, agent label and profile domain; the installer migrates agents from earlier identifiers.
+- `build-release.sh` produces app, installers, uninstaller and profile in one run, with optional Developer ID signing and notarization; release artifacts are published with checksums on GitHub.
 
 ### 0.9.6
 

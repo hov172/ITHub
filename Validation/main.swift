@@ -211,7 +211,7 @@ let profileDoc: [String: Any] = ["settings": ["branding": ["title": "Profile Co"
 precondition(HealthPolicy.parse(profileDoc).appTitle == "Profile Co" && HealthPolicy.parse(profileDoc).fileVaultOff == .attention)
 precondition(QuickActionConfig.parse(profileDoc, allowScripts: false).map(\.title) == ["Links"])
 precondition(QuickActionConfig.preferenceDocument() == nil || QuickActionConfig.activeSourceDescription() == "Configuration profile")
-precondition(QuickActionConfig.preferenceDomain == "edu.slc.ithub")
+precondition(!QuickActionConfig.preferenceDomain.isEmpty)
 print("Passed 4 configuration-profile checks")
 
 precondition(HealthPolicy.parse("{}".data(using: .utf8)!)?.locationPromptAtLaunch == true)

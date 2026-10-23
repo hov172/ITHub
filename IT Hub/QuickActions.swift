@@ -178,7 +178,8 @@ nonisolated enum QuickActionConfig {
 
     /// The preference domain an MDM configuration profile targets. The profile carries the same
     /// `branding`, `policy` and `content` keys as menu.json, under a `settings` dictionary or at top level.
-    static let preferenceDomain = "edu.slc.ithub"
+    /// Same as the bundle identifier, so one Xcode setting names the app, its agent and its profile domain.
+    static let preferenceDomain = Bundle.main.bundleIdentifier ?? "com.ayala.solutions.ithub"
     static let preferenceKeys = ["settings", "branding", "policy", "content", "title"]
 
     /// A managed profile wins over every file. Values are trusted (scripts allowed) only when

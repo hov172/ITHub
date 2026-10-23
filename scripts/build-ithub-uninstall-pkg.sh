@@ -2,7 +2,7 @@
 # Build a payload-free package whose postinstall unloads the LaunchAgent and removes the app and managed config.
 set -euo pipefail
 usage() { echo "build-ithub-uninstall-pkg.sh [-v version] [-i identifier] [-l launchagent.label] [-o output.pkg]"; }
-VERSION="1.0.0"; IDENTIFIER="edu.slc.ithub.uninstall"; LABEL="edu.slc.ithub.launcher"; OUTPUT="build/ITHubUninstall.pkg"
+VERSION="1.0.0"; IDENTIFIER="com.ayala.solutions.ithub.uninstall"; LABEL="com.ayala.solutions.ithub.launcher"; OUTPUT="build/ITHubUninstall.pkg"
 while [[ $# -gt 0 ]]; do case "$1" in
   -h|--help) usage; exit 0 ;; -v) VERSION="$2"; shift 2 ;; -i) IDENTIFIER="$2"; shift 2 ;; -l) LABEL="$2"; shift 2 ;;
   -o) OUTPUT="$2"; shift 2 ;; *) echo "Unknown option: $1" >&2; usage; exit 1 ;;

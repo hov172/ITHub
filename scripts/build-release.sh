@@ -15,10 +15,10 @@ build-release.sh [-j menu.json] [-n name] [-O org] [-a "Developer ID Application
 
 Examples:
   ./scripts/build-release.sh
-  ./scripts/build-release.sh -j examples/menu-slc.json -n SLC -O "Sarah Lawrence College"
-  ./scripts/build-release.sh -j examples/menu-slc.json -n SLC -O "Sarah Lawrence College" \
-      -a "Developer ID Application: Sarah Lawrence College (TEAMID)" \
-      -I "Developer ID Installer: Sarah Lawrence College (TEAMID)" -k slc-notary
+  ./scripts/build-release.sh -j examples/menu-as.json -n AS -O "Ayala Solutions"
+  ./scripts/build-release.sh -j examples/menu-as.json -n AS -O "Ayala Solutions" \
+      -a "Developer ID Application: Ayala Solutions (TEAMID)" \
+      -I "Developer ID Installer: Ayala Solutions (TEAMID)" -k as-notary
 U
 }
 CONFIG="IT Hub/menu.json"; NAME="default"; ORG="IT"; APP_ID=""; PKG_ID=""; NOTARY=""; OUT="build"

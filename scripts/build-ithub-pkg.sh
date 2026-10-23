@@ -3,10 +3,10 @@
 set -euo pipefail
 usage() { cat <<'U'
 build-ithub-pkg.sh [-v version] [-i identifier] [-a path/to/IT Hub.app] [-j menu.json] [-l launchagent.label] [-o output.pkg]
-Defaults: version from the app's Info.plist, identifier edu.slc.ithub, menu "IT Hub/menu.json", label edu.slc.ithub.launcher, output build/ITHub.pkg
+Defaults: version and identifier from the app's Info.plist, menu "IT Hub/menu.json", label <identifier>.launcher, output build/ITHub.pkg
 U
 }
-APP=""; JSON="IT Hub/menu.json"; IDENTIFIER="edu.slc.ithub"; LABEL="edu.slc.ithub.launcher"; OUTPUT="build/ITHub.pkg"; VERSION=""
+APP=""; JSON="IT Hub/menu.json"; IDENTIFIER=""; LABEL=""; OUTPUT="build/ITHub.pkg"; VERSION=""
 while [[ $# -gt 0 ]]; do case "$1" in
   -h|--help) usage; exit 0 ;; -v) VERSION="$2"; shift 2 ;; -i) IDENTIFIER="$2"; shift 2 ;; -a) APP="$2"; shift 2 ;;
   -j) JSON="$2"; shift 2 ;; -l) LABEL="$2"; shift 2 ;; -o) OUTPUT="$2"; shift 2 ;; *) echo "Unknown option: $1" >&2; usage; exit 1 ;;
@@ -15,6 +15,9 @@ esac; done
 [[ -f "$JSON" ]] || { echo "menu.json not found at $JSON" >&2; exit 1; }
 python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$JSON" || { echo "menu.json is not valid JSON" >&2; exit 1; }
 VERSION="${VERSION:-$(defaults read "$(cd "$APP" && pwd)/Contents/Info.plist" CFBundleShortVersionString)}"
+BUNDLE_ID="$(defaults read "$(cd "$APP" && pwd)/Contents/Info.plist" CFBundleIdentifier)"
+IDENTIFIER="${IDENTIFIER:-$BUNDLE_ID}"
+LABEL="${LABEL:-$BUNDLE_ID.launcher}"
 ROOT="$(mktemp -d)"; trap 'rm -rf "$ROOT"' EXIT
 mkdir -p "$ROOT/Applications" "$ROOT/Library/Application Support/IT Hub" "$ROOT/Library/LaunchAgents" "$(dirname "$OUTPUT")"
 cp -R "$APP" "$ROOT/Applications/IT Hub.app"
@@ -36,16 +39,27 @@ PLIST
 # whose identifier differs from the package, so remove such a copy first or the upgrade lands
 # beside it in "IT Hub.localized" while reporting success.
 SCRIPTS="$(mktemp -d)"
-cat > "$SCRIPTS/preinstall" <<'PRE'
+cat > "$SCRIPTS/preinstall" <<PRE
 #!/bin/bash
 APP="/Applications/IT Hub.app"
-if [[ -d "$APP" ]]; then
-    current="$(defaults read "$APP/Contents/Info.plist" CFBundleIdentifier 2>/dev/null || true)"
-    if [[ "$current" != "edu.slc.ithub" ]]; then
+if [[ -d "\$APP" ]]; then
+    current="\$(defaults read "\$APP/Contents/Info.plist" CFBundleIdentifier 2>/dev/null || true)"
+    if [[ "\$current" != "$BUNDLE_ID" ]]; then
         pkill -x "IT Hub" >/dev/null 2>&1 || true
-        rm -rf "$APP"
+        rm -rf "\$APP"
     fi
 fi
+# Retire LaunchAgents from earlier identifiers that still point at this app.
+for plist in /Library/LaunchAgents/*.plist; do
+    [[ -f "\$plist" ]] || continue
+    grep -q "IT Hub.app/Contents/MacOS/IT Hub" "\$plist" || continue
+    label="\$(defaults read "\$plist" Label 2>/dev/null || true)"
+    [[ -n "\$label" && "\$label" != "$LABEL" ]] || continue
+    for uid in \$(dscl . -list /Users UniqueID | awk '\$2 >= 500 { print \$2 }'); do
+        launchctl bootout "gui/\$uid/\$label" >/dev/null 2>&1 || true
+    done
+    rm -f "\$plist"
+done
 exit 0
 PRE
 chmod +x "$SCRIPTS/preinstall"

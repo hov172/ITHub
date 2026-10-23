@@ -4,7 +4,7 @@
     "title": "Quick Actions",
     "branding": {
       "title": "IT Hub",
-      "subtitle": "Device Health"
+      "subtitle": "Ayala Solutions"
     },
     "policy": {
       "fileVaultOff": "critical",
@@ -69,31 +69,31 @@
       {
         "functionIdentifier": "public.submenu",
         "settings": {
-          "title": "SLC ITS Help Desk",
+          "title": "Ayala Solutions Help Desk",
           "content": [
             {
               "functionIdentifier": "public.title",
               "settings": {
-                "template": "Monday - Friday 9 a.m - 5 p.m"
+                "template": "Monday - Friday 9 a.m. - 5 p.m."
               }
             },
             {
               "functionIdentifier": "public.title",
               "settings": {
-                "template": "914-395-2460"
+                "template": "555-010-0100"
               }
             },
             {
               "functionIdentifier": "public.title",
               "settings": {
-                "template": "hd@gm.slc.edu"
+                "template": "helpdesk@ayala.solutions"
               }
             },
             {
               "functionIdentifier": "public.link",
               "settings": {
                 "title": "Remote Support Link",
-                "url": "https://simplehelp.slc.edu/",
+                "url": "https://remote.ayala.solutions/",
                 "icon": "safari"
               }
             },

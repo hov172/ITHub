@@ -229,7 +229,7 @@ All settings live in one document with this shape:
     "title": "Quick Actions",
     "branding": { "title": "IT Hub", "subtitle": "Device Health" },
     "policy": { "fileVaultOff": "critical", "uptimeWarningDays": 14 },
-    "content": [ ...quick action groups... ]
+    "content": []
   }
 }
 ```

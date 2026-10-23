@@ -85,7 +85,128 @@ All paths are relative to the repository root, the folder containing `IT Hub.xco
 
 Typical sequence: edit `examples/menu-as.json`, then run `./scripts/build-release.sh -j examples/menu-as.json -n AS -O "Your Organisation"`. Everything lands in `build/`.
 
-## How settings load
+## Configure IT Hub for your organisation
+
+Everything that differs between organisations lives in one JSON document. You never edit Swift or rebuild the app to change contact details, links, thresholds or wording. This chapter walks through that document from the top; the reference tables for every key follow in the next chapter.
+
+### Step 1: start from the example
+
+Copy `examples/menu-as.json` to a new file, for example `examples/menu-yourorg.json`. It is a complete, working configuration. Open it in any text editor; the structure is:
+
+```json
+{
+  "functionIdentifier": "public.submenu",
+  "settings": {
+    "title": "Quick Actions",
+    "branding": { ... },      // header text
+    "policy":   { ... },      // health rules and feature switches
+    "content":  [ ... ]       // the Quick Actions groups
+  }
+}
+```
+
+JSON does not allow comments, so remove those `//` notes if you paste this. Keep the file valid: a missing comma makes the whole file unreadable, in which case the app silently falls back to the next source. `python3 -m json.tool examples/menu-yourorg.json` checks it in a second.
+
+### Step 2: branding
+
+```json
+"branding": { "title": "IT Hub", "subtitle": "Device Health" }
+```
+
+- `title` is the name in the dashboard header, the menu bar hover text, the Quit button and the top of the support report. Many organisations put their helpdesk name here, such as "Acme IT".
+- `subtitle` is the large heading under it. Use it for the organisation name or leave "Device Health".
+
+### Step 3: contact details and quick actions
+
+`content` is a list of groups. Each group has a title and a list of rows, and the panel shows the groups in a grid in the order written. The example ships four groups: Help Desk, Ayala Solutions Help Desk, Browsers and Mail. Rename, reorder, delete or add groups freely.
+
+A text row, for hours, a phone number or an email address:
+
+```json
+{ "functionIdentifier": "public.title", "settings": { "template": "Monday - Friday 9 a.m. - 5 p.m." } }
+```
+
+A link, which opens in the default browser or mail client:
+
+```json
+{ "functionIdentifier": "public.link", "settings": { "title": "Create Ticket", "url": "https://helpdesk.example.com/new", "icon": "plus.bubble" } }
+```
+
+An app launcher, by bundle identifier with a name as fallback:
+
+```json
+{ "functionIdentifier": "public.open.application", "settings": { "title": "Self Service", "bundleIdentifier": "com.jamfsoftware.selfservice.mac", "name": "Self Service", "icon": "square.grid.2x2" } }
+```
+
+A script, honoured only from a managed file or a profile, never from a user's own file:
+
+```json
+{ "functionIdentifier": "public.script", "settings": { "title": "Renew DHCP lease", "command": "sudo ipconfig set en0 DHCP", "showOutput": false, "icon": "arrow.clockwise" } }
+```
+
+Tips:
+
+- Find an app's bundle identifier with `osascript -e 'id of app "Microsoft Outlook"'`.
+- `icon` is any SF Symbol name; browse them in Apple's SF Symbols app. Leave it out for a sensible default.
+- To take something out of the panel without deleting it, add `"hidden": true` inside its `settings`. Works on a group or a single row.
+- Text rows containing `{value}` are ignored; TopMenu used them for live data the health cards already show.
+
+### Step 4: health rules
+
+The `policy` block decides what turns the menu bar icon orange or red and what appears under Needs attention. Every key is optional; omit any you do not care about and the default applies.
+
+Severity keys take `critical` (red), `warning` (orange) or `ignore` (never raised; the card still shows the reading):
+
+```json
+"fileVaultOff": "critical",
+"softwareUpdates": "warning",
+"networkOffline": "warning"
+```
+
+Threshold keys are numbers, and `0` switches that check off:
+
+```json
+"uptimeWarningDays": 14,
+"storageWarningGB": 20,   "storageCriticalGB": 5,
+"batteryWarningPercent": 20, "batteryCriticalPercent": 10, "batteryHealthWarningPercent": 80
+```
+
+Common adjustments:
+
+- **MDM owns macOS updates and you do not want users nagged**: `"softwareUpdates": "ignore"`.
+- **FileVault is enforced elsewhere and an off reading should not alarm users**: `"fileVaultOff": "warning"` or `"ignore"`. The FileVault card still shows red when it is off, so the fact is never hidden.
+- **Lab or kiosk Macs that run for months**: `"uptimeWarningDays": 0`, or a higher number.
+- **Desktops without batteries** need nothing; the battery check skips itself when no battery is present.
+- **Users on a specific corporate Wi-Fi**: `"expectedWiFiSSID": "Corp-Secure"` makes the Services card confirm the network, orange if different.
+
+### Step 5: feature switches
+
+```json
+"speedTestEnabled": true,  "speedTestSeconds": 5,
+"wifiNameLookup": true,    "locationPromptAtLaunch": true,
+"allowQuit": true,         "updateScanMinutes": 30
+```
+
+- Metered or satellite links: `"speedTestEnabled": false`, or shorten `speedTestSeconds` to 2.
+- Organisations that do not want a Location Services prompt at all: `"wifiNameLookup": false`. The Wi-Fi name and expected-network comparison disappear and macOS is never asked.
+- Keep the name lookup but avoid a window on first launch: `"locationPromptAtLaunch": false`; users can still allow it from the Services card.
+- Fleets where the LaunchAgent keeps the app alive anyway: `"allowQuit": false` hides the Quit button.
+
+### Step 6: apply it
+
+Pick one of three ways, depending on how your Macs are managed:
+
+| Situation | Do this |
+|---|---|
+| Jamf or another MDM | Generate a profile from your JSON (see Configuration profile below) and scope it. The profile outranks every file and can be changed any time without reinstalling. |
+| A fleet without MDM, or a lab | Build the installer with your JSON: `./scripts/build-release.sh -j examples/menu-yourorg.json -n yourorg -O "Your Org"`. The JSON ships as the managed file. |
+| One Mac, or testing | Copy the JSON to `/Library/Application Support/IT Hub/menu.json` with `sudo`. The running app picks it up within a second. |
+
+The dashboard footer always says which source is active, so you can tell at a glance whether a Mac is on the profile, the managed file, a user's own file or the built-in defaults.
+
+## Reference
+
+### How settings load
 
 All settings live in one document with this shape:
 
@@ -116,7 +237,7 @@ Changes apply live. Both file folders and the files themselves are watched, so a
 
 `examples/menu-as.json` is a complete filled-in configuration for Ayala Solutions. The bundled default contains only placeholders (`example.com` links, a `555` phone number) so the generic package can ship anywhere.
 
-## Quick Actions
+### Quick Actions keys
 
 `settings.content` is an array of groups. Each group is a `public.submenu` whose own `settings.content` holds rows. Rows placed directly at the top level are collected into one group named after the root `settings.title`. A group with no visible rows is not shown.
 
@@ -132,7 +253,7 @@ Common keys: `icon` is an SF Symbol name; the defaults are `info.circle`, `link`
 
 TopMenu keys and plugins not carried over: `arguments`, `runOnStart`, `iconKind`, `badgeLabel`, `badgeColor`, `valueProvider`, and the `public.separator`, `public.quit`, `public.network.state` and `public.cloudflare.speed` identifiers. They are ignored if present. Network state and the speed test are built into the Services card instead.
 
-## Health policy
+### Health policy keys
 
 `settings.policy` tunes the health rules. Every key is optional; a missing, negative or non-numeric value keeps the default. Severity words are `critical` (red), `warning` (orange) and `ignore` (no notice, no icon change); `attention` is accepted for warning, and `off` or `none` for ignore. Where a key says `0` disables a check, the card still shows the measured reading, it just never colours the icon or appears under Needs attention.
 
@@ -157,7 +278,7 @@ TopMenu keys and plugins not carried over: `arguments`, `runOnStart`, `iconKind`
 
 Fixed in code, on purpose: device readings refresh every minute, memory is sampled every 10 seconds, a clean update result older than one hour becomes unknown, memory-pressure severity follows the kernel's own levels, and the dashboard is 720 points wide.
 
-## Branding
+### Branding keys
 
 `settings.branding` sets `title` (default `IT Hub`) and `subtitle` (default `Device Health`). The title also appears in the menu bar hover text, on the Quit button and as the support report heading. Blank values keep the defaults.
 

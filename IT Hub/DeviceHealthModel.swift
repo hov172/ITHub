@@ -78,6 +78,9 @@ nonisolated enum UpdateNotice {
         refreshing = true
         defer { refreshing = false }
         networkModel.refresh(); uptime.refresh()
+        // Profiles and managed files normally announce themselves; the minute refresh covers the
+        // cases that do not, such as a preference domain cleared while cfprefsd was restarting.
+        quickActions.reload()
         await security.refresh(); await storage.refresh(); await battery.refresh()
     }
     private func scanUpdates() {

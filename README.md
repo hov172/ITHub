@@ -4,6 +4,10 @@ A macOS menu bar app for IT support. It shows device health at a glance (FileVau
 
 Version 1.0 merges two earlier apps: IT Hub 0.9.6 (the health dashboard) and TopMenu (the JSON-driven launcher). The 0.9.x changelog is kept at the end of this file.
 
+## Credits
+
+This app is built on the IT-Hub work shared by Jorn de Koning on the Mac Admins Slack. His IT-Hub concept and implementation are the starting point for the health dashboard here; the configuration system, TopMenu merge, speed test and packaging were added on top of that foundation.
+
 ## Install
 
 Build the installer and run it:

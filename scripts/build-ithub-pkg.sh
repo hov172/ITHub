@@ -79,7 +79,8 @@ for stray in /Applications/IT\ Hub*.localized; do
     fi
 done
 for uid in \$(dscl . -list /Users UniqueID | awk '\$2 >= 500 { print \$2 }'); do
-    # A freshly installed or renamed agent is not yet loaded in the session: bootstrap first (no-op if loaded).
+    # bootout then bootstrap: bootstrap is a no-op when the label is already loaded, so an upgrade would otherwise keep the old job definition
+    launchctl bootout "gui/\$uid/$LABEL" >/dev/null 2>&1 || true
     launchctl bootstrap "gui/\$uid" "/Library/LaunchAgents/$LABEL.plist" >/dev/null 2>&1 || true
     launchctl kickstart -k "gui/\$uid/$LABEL" >/dev/null 2>&1 || true
 done

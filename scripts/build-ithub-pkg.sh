@@ -71,6 +71,8 @@ chmod +x "$SCRIPTS/postinstall"
 COMPONENTS="$ROOT.components.plist"
 pkgbuild --analyze --root "$ROOT" "$COMPONENTS" >/dev/null
 plutil -replace 0.BundleIsRelocatable -bool NO "$COMPONENTS"
-pkgbuild --root "$ROOT" --component-plist "$COMPONENTS" --scripts "$SCRIPTS" --identifier "$IDENTIFIER" --version "$VERSION" --ownership recommended "$OUTPUT"
+# pkgbuild's ownership pass prints "write: Permission denied" for files it cannot chown in the
+# temporary root; the package is still correct, so hide that one line.
+pkgbuild --root "$ROOT" --component-plist "$COMPONENTS" --scripts "$SCRIPTS" --identifier "$IDENTIFIER" --version "$VERSION" --ownership recommended "$OUTPUT" 2> >(grep -v '^write: Permission denied' >&2)
 rm -f "$COMPONENTS"; rm -rf "$SCRIPTS"
 echo "Built $OUTPUT (version $VERSION). Managed config: /Library/Application Support/IT Hub/menu.json"

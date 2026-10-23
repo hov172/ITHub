@@ -239,7 +239,7 @@ nonisolated enum SpeedTest {
     init() {
         monitor.pathUpdateHandler = { [weak self] path in
             let satisfied = path.status == .satisfied
-            Task { @MainActor in self?.reachable = satisfied }
+            Task { @MainActor [weak self] in self?.reachable = satisfied }
         }
         monitor.start(queue: DispatchQueue(label: "ITHub.InternetReachability"))
     }

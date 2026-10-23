@@ -11,6 +11,14 @@ import AppKit
         window.makeKeyAndOrderFront(nil)
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
+    /// For windows that must sit *under* a system prompt (the Location Services dialog): normal
+    /// level, no hide-on-deactivate, so the prompt stays on top and clickable while this stays visible.
+    static func presentBeneathSystemPrompts(_ window: NSWindow) {
+        window.level = .normal
+        window.hidesOnDeactivate = false
+        window.makeKeyAndOrderFront(nil)
+        NSApplication.shared.activate(ignoringOtherApps: true)
+    }
     private static func beginHandoff(to bundleID: String) {
         // Yield while this user-initiated action still has activation authority.
         if #available(macOS 14.0, *) {

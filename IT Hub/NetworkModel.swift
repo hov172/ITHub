@@ -52,7 +52,8 @@ import CoreLocation
             .sink { [weak self] _ in
                 Task { @MainActor [weak self] in self?.requestPendingPermission() }
             }
-        WindowPresentation.prepare(window)
+        // Floating above the panel put this window over the macOS location prompt, hiding Allow.
+        WindowPresentation.presentBeneathSystemPrompts(window)
         requestPendingPermission()
     }
     private func requestPendingPermission() {

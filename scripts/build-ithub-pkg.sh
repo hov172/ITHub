@@ -73,7 +73,10 @@ for stray in /Applications/IT\ Hub*.localized; do
     if [[ -d "\$stray/IT Hub.app" ]]; then
         rm -rf "\$APP"
         mv "\$stray/IT Hub.app" "\$APP"
-        rmdir "\$stray" 2>/dev/null || true
+    fi
+    # Whether or not an app was inside, drop the folder once only the installer's marker remains.
+    if [[ -z "\$(find "\$stray" -mindepth 1 -not -path '*/.localized*' -print -quit 2>/dev/null)" ]]; then
+        rm -rf "\$stray"
     fi
 done
 for uid in \$(dscl . -list /Users UniqueID | awk '\$2 >= 500 { print \$2 }'); do

@@ -10,11 +10,11 @@
 			<key>PayloadEnabled</key>
 			<true/>
 			<key>PayloadIdentifier</key>
-			<string>com.ayala.solutions.ithub.settings.1FA20A11-D9E0-4495-86FB-2805FFD9658A</string>
+			<string>com.ayala.solutions.ithub.settings.8E948D90-BB6E-429A-9EFA-E8AA8EF6E75F</string>
 			<key>PayloadType</key>
 			<string>com.ayala.solutions.ithub</string>
 			<key>PayloadUUID</key>
-			<string>1FA20A11-D9E0-4495-86FB-2805FFD9658A</string>
+			<string>8E948D90-BB6E-429A-9EFA-E8AA8EF6E75F</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 			<key>settings</key>
@@ -304,7 +304,7 @@
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>DE05E218-E0F6-434B-B700-E8E8DBC2E6DA</string>
+	<string>AA33761D-9685-498E-8FD6-D402AEE4E490</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>

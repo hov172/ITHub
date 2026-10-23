@@ -98,14 +98,14 @@ Copy `examples/menu-as.json` to a new file, for example `examples/menu-yourorg.j
   "functionIdentifier": "public.submenu",
   "settings": {
     "title": "Quick Actions",
-    "branding": { ... },      // header text
-    "policy":   { ... },      // health rules and feature switches
-    "content":  [ ... ]       // the Quick Actions groups
+    "branding": { "title": "IT Hub", "subtitle": "Device Health" },
+    "policy": { "fileVaultOff": "critical" },
+    "content": []
   }
 }
 ```
 
-JSON does not allow comments, so remove those `//` notes if you paste this. Keep the file valid: a missing comma makes the whole file unreadable, in which case the app silently falls back to the next source. `python3 -m json.tool examples/menu-yourorg.json` checks it in a second.
+`branding` holds the header text, `policy` the health rules and feature switches, and `content` the Quick Actions groups; each is covered in the steps below. JSON does not allow comments. Keep the file valid: a missing comma makes the whole file unreadable, in which case the app silently falls back to the next source. `python3 -m json.tool examples/menu-yourorg.json` checks it in a second.
 
 ### Step 2: branding
 
@@ -158,17 +158,24 @@ The `policy` block decides what turns the menu bar icon orange or red and what a
 Severity keys take `critical` (red), `warning` (orange) or `ignore` (never raised; the card still shows the reading):
 
 ```json
-"fileVaultOff": "critical",
-"softwareUpdates": "warning",
-"networkOffline": "warning"
+"policy": {
+  "fileVaultOff": "critical",
+  "softwareUpdates": "warning",
+  "networkOffline": "warning"
+}
 ```
 
 Threshold keys are numbers, and `0` switches that check off:
 
 ```json
-"uptimeWarningDays": 14,
-"storageWarningGB": 20,   "storageCriticalGB": 5,
-"batteryWarningPercent": 20, "batteryCriticalPercent": 10, "batteryHealthWarningPercent": 80
+"policy": {
+  "uptimeWarningDays": 14,
+  "storageWarningGB": 20,
+  "storageCriticalGB": 5,
+  "batteryWarningPercent": 20,
+  "batteryCriticalPercent": 10,
+  "batteryHealthWarningPercent": 80
+}
 ```
 
 Common adjustments:
@@ -182,9 +189,14 @@ Common adjustments:
 ### Step 5: feature switches
 
 ```json
-"speedTestEnabled": true,  "speedTestSeconds": 5,
-"wifiNameLookup": true,    "locationPromptAtLaunch": true,
-"allowQuit": true,         "updateScanMinutes": 30
+"policy": {
+  "speedTestEnabled": true,
+  "speedTestSeconds": 5,
+  "wifiNameLookup": true,
+  "locationPromptAtLaunch": true,
+  "allowQuit": true,
+  "updateScanMinutes": 30
+}
 ```
 
 - Metered or satellite links: `"speedTestEnabled": false`, or shorten `speedTestSeconds` to 2.

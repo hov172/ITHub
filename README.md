@@ -7,7 +7,7 @@ Version 1.0 merges two earlier apps: IT Hub 0.9.6 (the health dashboard) and Top
 ## Credits
 
 This app is built on the IT-Hub work shared by Jorn de Koning on the Mac Admins Slack. His IT-Hub concept and implementation are the starting point for the health dashboard here; the configuration system, TopMenu merge, speed test and packaging were added on top of that foundation.
-
+https://github.com/Bonjorno-Jorno 
 ## Download
 
 Ready-built files for each version are attached to the GitHub release for its tag, for example https://github.com/hov172/ITHub/releases/tag/v1.0.0:
